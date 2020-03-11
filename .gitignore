@@ -1,0 +1,19 @@
+# .gitignore
+
+# Environment setup
+.env
+
+# Python stuff
+venv/
+__pycache__/
+*.pyc
+
+# Flask storage for development
+instance/
+
+# Backups
+*.bak
+*~
+
+# MacOS stuff
+.DS_Store
