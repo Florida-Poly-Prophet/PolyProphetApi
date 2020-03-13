@@ -25,8 +25,7 @@ class QuestionSchema(ma.SQLAlchemySchema):
     # TODO Only dump for privileged users
     correct_answer = ma.auto_field()
     more_info_link = ma.auto_field()
-    # TODO Allow writing to this?
-    created_at = ma.auto_field(dump_only=True)
+    available_at = ma.auto_field()
     expires_at = ma.auto_field()
 
 

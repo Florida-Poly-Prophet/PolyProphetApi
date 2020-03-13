@@ -27,7 +27,7 @@ class Question(db.Model):
     more_info_link = db.Column(db.Text)
     # Null indicates no known correct answer
     correct_answer = db.Column(db.Boolean)
-    created_at = db.Column(
+    available_at = db.Column(
         db.DateTime, nullable=False, server_default=sql.func.now())
     # Null indicates no expiration
     expires_at = db.Column(db.DateTime)
@@ -44,7 +44,7 @@ class Response(db.Model):
     # Null indicates the user skipped the question
     # TODO Use an enum instead to be more explicit?
     response = db.Column(db.Boolean)
-    view_time = db.Column(db.Time, nullable=True)
+    view_time = db.Column(db.Time)
     answered_at = db.Column(
         db.DateTime, nullable=False, server_default=sql.func.now())
 

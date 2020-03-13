@@ -45,7 +45,7 @@ Question {
     // null indicates that the correct answer is unknown / is subjective
     correct_answer: bool?,
     more_info_link: string?,
-    created_at: DateTime,
+    available_at: DateTime,
     expires_at: DateTime?,
 }
 ```
@@ -142,7 +142,7 @@ POST /questions {
     prompt: string,
     correct_answer: bool?,
     more_info_link: URL?,
-    created_at: DateTime?, // Defaults to current time
+    available_at: DateTime?, // Defaults to current time
     expires_at: DateTime?,
 } -> {
     data: Question,
@@ -160,7 +160,7 @@ PUT /questions/<id> {
     prompt: string?,
     correct_answer: bool?,
     more_info_link: URL?,
-    created_at: DateTime?,
+    available_at: DateTime?,
     expires_at: DateTime?,
 } -> {
     data: Question,
