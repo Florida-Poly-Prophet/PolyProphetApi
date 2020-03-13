@@ -44,7 +44,7 @@ class Response(db.Model):
     # Null indicates the user skipped the question
     # TODO Use an enum instead to be more explicit?
     response = db.Column(db.Boolean)
-    view_time = db.Column(db.Time, nullable=False)
+    view_time = db.Column(db.Time, nullable=True)
     answered_at = db.Column(
         db.DateTime, nullable=False, server_default=sql.func.now())
 

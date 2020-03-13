@@ -1,13 +1,9 @@
 from http import HTTPStatus
 
-import requests
-
 from flask import g, request, url_for
 from flask.views import MethodView
 
-from marshmallow import Schema
-
-from prophet import app, db, class_route
+from prophet import app, class_route, db
 from prophet.auth import msal_app, requires_auth
 from prophet.models import User, Response
 from prophet.schemas import UserSchema, user_schema, users_schema, responses_schema
@@ -42,7 +38,7 @@ def create_user(sub, commit=True):
     return user
 
 
-def get_user_by_id(id, create=False):
+def query_user(id, create=False):
     """Gets a user from the database, creating it if necessary.
     Accepts the user ID (local to this database) or the string "me" to indicate
     the current user.
@@ -91,7 +87,8 @@ def user_with_links(user):
         'data': user_schema.dump(user),
         'links': {
             'self': url_for('user_detail', id=user.id, _external=True),
-            'responses': url_for('user_responses', id=user.id, _external=True),
+            'responses': url_for(
+                'user_responses', user_id=user.id, _external=True),
         },
     }
 
@@ -99,14 +96,18 @@ def user_with_links(user):
 @class_route('/users/<id>', 'user_detail')
 class UserDetail(MethodView):
     def get(self, id):
-        user = get_user_by_id(id, True)
+        user = query_user(id, True)
         return user_with_links(user)
 
     def delete(self, id):
         # Don't create the user since it will be deleted immediately
-        user = get_user_by_id(id)
+        user = query_user(id)
+        # TODO Delete the user's responses? Does this happend automatically?
         db.session.delete(user)
-        return {}
+        db.session.commit()
+        return {
+            'data': {}
+        }
 
 
 @class_route('/users', 'user_list')
@@ -125,19 +126,8 @@ class UserList(MethodView):
         return user_with_links(user)
 
 
-@class_route('/users/<id>/responses', 'user_responses')
-class UserResponses(MethodView):
-    def get(self, id):
-        # Get the user to check that the user ID is valid and to resolve
-        # references to "me" (but don't create users just to look at an empty
-        # list of responses).
-        user = get_user_by_id(id)
-        responses = Response.query.filter_by(user_id=user.id).all()
+# @class_route('/users/<id>/questions', 'user_question_list')
+# class UserQuestions(MethodView):
+#     """Route for a user's unanswered questions."""
 
-        return {
-            'data': responses_schema.dump(responses),
-            'links': {
-                'self': url_for('user_responses', id=id, _external=True),
-                'user': url_for('user_detail', id=id, _external=True),
-            },
-        }
+#     def get(self, id):

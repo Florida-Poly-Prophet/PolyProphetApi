@@ -7,6 +7,7 @@ from prophet import app
 # Import these so that the app routes are loaded
 import prophet.resources.question
 import prophet.resources.user
+import prophet.resources.response
 
 
 @app.errorhandler(ValidationError)

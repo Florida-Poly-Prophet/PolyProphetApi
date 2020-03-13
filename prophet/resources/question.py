@@ -5,7 +5,7 @@ from flask.views import MethodView
 
 from marshmallow import Schema, fields
 
-from prophet import app, db, class_route
+from prophet import app, class_route, db
 from prophet.models import Question, Response
 from prophet.schemas import question_schema, questions_schema, responses_schema
 
@@ -25,7 +25,7 @@ def handle_question_not_found(e):
     }, HTTPStatus.NOT_FOUND
 
 
-def question_or_not_found(id):
+def query_question(id):
     q = Question.query.get(id)
     if q is None:
         raise QuestionNotFound(id)
@@ -38,7 +38,8 @@ def question_with_links(q):
         'data': question_schema.dump(q),
         'links': {
             'self': url_for('question_detail', id=q.id, _external=True),
-            'responses': url_for('question_responses', id=q.id, _external=True),
+            'responses': url_for(
+                'question_responses', question_id=q.id, _external=True),
         },
     }
 
@@ -48,21 +49,23 @@ def question_with_links(q):
 @class_route('/questions/<id>', 'question_detail')
 class QuestionDetail(MethodView):
     def get(self, id):
-        q = question_or_not_found(id)
+        q = query_question(id)
         return question_with_links(q)
 
     def put(self, id):
-        q = question_or_not_found(id)
-        q = question_schema.load(request.get_json(), instance=q)
+        q = query_question(id)
+        q = question_schema.load(request.get_json(), instance=q, partial=True)
         db.session.add(q)
         db.session.commit()
         return question_with_links(q)
 
     def delete(self, id):
-        q = question_or_not_found(id)
+        q = query_question(id)
         db.session.delete(q)
         db.session.commit()
-        return {}
+        return {
+            'data': {}
+        }
 
 
 @class_route('/questions', 'question_list')
@@ -80,23 +83,3 @@ class QuestionList(MethodView):
         db.session.add(q)
         db.session.commit()
         return question_with_links(q)
-
-
-@class_route('/questions/<id>/responses', 'question_responses')
-class QuestionResponses(MethodView):
-    def get(self, id):
-        responses = Response.query.filter_by(question_id=id).all()
-        # Check if the question ID is valid and return proper error rather than
-        # just an empty list of responses
-        if len(responses) == 0:
-            # Don't need the result, just the exception thrown in the question
-            # does not exist
-            question_or_not_found(id)
-
-        return {
-            'data': responses_schema.dump(responses),
-            'links': {
-                'self': url_for('question_responses', id=id, _external=True),
-                'question': url_for('question_detail', id=id, _external=True),
-            },
-        }

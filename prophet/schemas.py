@@ -29,10 +29,6 @@ class QuestionSchema(ma.SQLAlchemySchema):
     created_at = ma.auto_field(dump_only=True)
     expires_at = ma.auto_field()
 
-    # _links = ma.Hyperlinks({
-    #     'self': ma.URLFor('question_detail'),
-    # })
-
 
 question_schema = QuestionSchema()
 questions_schema = QuestionSchema(many=True)
@@ -43,9 +39,8 @@ class ResponseSchema(ma.SQLAlchemySchema):
         model = Response
         load_instance = True
 
-    user = ma.auto_field('user_id')
-    question = ma.auto_field('question_id')
-
+    user_id = ma.auto_field()
+    question_id = ma.auto_field()
     response = ma.auto_field()
     view_time = ma.auto_field()
     answered_at = ma.auto_field()
